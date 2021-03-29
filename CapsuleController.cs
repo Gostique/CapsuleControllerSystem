@@ -15,12 +15,13 @@ namespace CapsuleControllerSystem
         [SerializeField] private int _raycastAmount = 8;
         [SerializeField] private float _raycastLenght = 0.5f;
 
-        [SerializeField] private float _speedMax = 200f;
+        [SerializeField] private float _horizontalSpeed = 200f;
+        [SerializeField] private float _rotationSpeed = 200f;
         [SerializeField] private float _jumpForce = 2.5f;
         [SerializeField] private int _maxJumpCount = 1;
         private int _currentJumpCount;
 
-        private Vector2 _moveDirection;
+        private Vector3 _moveDirection;
         private float _rotateDirection;
         private bool _triggerJump;
 
@@ -45,9 +46,13 @@ namespace CapsuleControllerSystem
         {
             SetStandingHeight();
         }
-        public void Move(Vector2 direction)
+        public void MoveWorld(Vector3 direction)
         {
             _moveDirection = direction;
+        }
+        public void MoveLocal(Vector3 direction)
+        {
+            _moveDirection = _transform.TransformVector(direction);
         }
         public void Rotate(float direction)
         {
@@ -184,16 +189,18 @@ namespace CapsuleControllerSystem
                 _rigidbody.useGravity = true;
             }
 
-
-
             // Horizontal mouvement
             if (IsGrounded || allowControlInMidAir)
             {
-                velocity.z = _moveDirection.x * _speedMax * Time.fixedDeltaTime; // Forward
-                velocity.x = _moveDirection.y * _speedMax * Time.fixedDeltaTime; // Straf
+                velocity.x = _moveDirection.x * _horizontalSpeed * Time.fixedDeltaTime; // Straf
+                velocity.z = _moveDirection.z * _horizontalSpeed * Time.fixedDeltaTime; // Forward
             }        
 
             _rigidbody.velocity = velocity;
+        }
+        private void Update()
+        {
+            _transform.Rotate(Vector3.up, _rotateDirection * _rotationSpeed * Time.deltaTime);
         }
         #endregion
 
